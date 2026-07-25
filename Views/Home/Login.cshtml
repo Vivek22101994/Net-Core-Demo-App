@@ -1,0 +1,125 @@
+﻿@model LoginViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <link rel="icon" href="~/favicon.png" type="image/x-icon" asp-append-version="true">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+            body {
+                margin: 0;
+                font-family: 'Poppins',sans-serif;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background: linear-gradient(135deg,#6a7bd8,#8e5bd9);
+            }
+
+            .login-card {
+                width: 380px;
+                background: #fff;
+                border-radius: 18px;
+                padding: 35px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,.2);
+            }
+
+            .text-danger{
+                color:red;
+            }
+
+            .input-box {
+                width: 100%;
+                padding: 12px;
+                margin: 8px 0;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+            }
+
+            .login-btn {
+                width: 100%;
+                padding: 13px;
+                border: none;
+                border-radius: 10px;
+                background: linear-gradient(90deg,#6a7bd8,#8e5bd9);
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+            .error {
+                background: #ffd6d6;
+                color: #c00000;
+                padding: 8px;
+                border-radius: 6px;
+                margin-bottom: 10px;
+            }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-card">
+
+        <h2>Admin Login</h2>
+        <p>Access administration panel</p>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="error">@ViewBag.Error</div>
+        }
+
+        <form asp-action="Login" method="post">
+
+            <input asp-for="Email"
+                   class="input-box"
+                   placeholder="email@example.com" />
+
+            <span asp-validation-for="Email" class="text-danger"></span>
+
+            <input asp-for="Password"
+                   class="input-box"
+                   placeholder="Password" />
+
+            <span asp-validation-for="Password" class="text-danger"></span>
+
+            <!-- CAPTCHA -->
+            <div style="margin:15px 0;">
+                <div class="g-recaptcha"
+                     data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                Login
+            </button>
+            <br />
+            <br />
+
+            <button type="button" class="login-btn"
+                    onclick="location.href='@Url.Action("Registation", "Home")'">
+                New user
+            </button>
+        </form>
+
+    </div>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+</body>
+</html>
+<script type="text/javascript">
+const NumArrya = [1,2,4,6,8,3,10,11,13];
+const Even = [];
+const Odd = [];
+NumArrya.filter(x=> x % 2 == 0 ? Even.push(x) : Odd.push(x));
+console.log(Even);
+// console.log(Odd);    document.addEventListener("contextmenu", function (e) {
+//     e.preventDefault();
+//     console.log("Right click blocked");
+//     });
+</script>

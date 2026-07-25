@@ -1,0 +1,62 @@
+﻿
+@{
+    ViewData["Title"] = "FileUploadDemo";
+}
+<div class="row">
+    <div class="col-md-2">
+        <lable>FirstName</lable>
+    </div>
+    <div class="col-md-4">
+         <input type="text" class="form-control" id="txtUserName" />
+    </div>
+    <div class="col-md-2">
+        <lable>PassWord</lable>
+    </div>
+    <div class="col-md-4">
+        <input type="password" class="form-control" id="txtPassword" />
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-2">
+        <lable>Select File</lable>
+    </div>
+    <div class="col-md-10">
+        <input type="file" id="AggrementFile" class="form-control" multiple />
+    </div>
+</div>
+<br />
+<center>
+    <button id="btnSendValue" class="btn btn-primary sm">Save File</button>
+</center>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        
+    })
+    $("#btnSendValue").click(function(){
+    var fileInput = $("#AggrementFile")[0];
+    var formData = new FormData();
+    if(fileInput.files.length > 0)
+    {
+    var file = fileInput.files[0];
+    formData.append("file", file);
+    }
+
+    formData.append("UserName", $("#txtUserName").val());
+    formData.append("Password", $("#txtPassword").val());
+
+    $.ajax({
+    url: "/Home/SaveHomewAyData",
+    type: 'POST',
+    cache: false,
+    contentType: false,
+    processData: false,
+    data: formData,
+    success: function (response) {
+
+        location.reload();
+    }
+    });
+    });
+</script>
