@@ -49,7 +49,13 @@ namespace WebApplication4.Controllers
         }
         public IActionResult Login()
         {
-            throw new Exception("Database connection failed");
+            //throw new Exception("Database connection failed");
+            string strName = "VivekParikh";
+            string LastChar = strName[^1].ToString();
+            if (strName[0] == 'V' && strName[^1] == 'h')
+            {
+                Console.WriteLine("String Start With 'V' And End With 'h' ");
+            }
             MyDelegate del = PrintMessage;
             del("Hello .NET Core");
             // Partial Class Demo

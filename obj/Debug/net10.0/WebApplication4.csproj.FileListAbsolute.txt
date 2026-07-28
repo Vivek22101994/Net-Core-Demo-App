@@ -668,3 +668,4 @@ C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\re
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.pdb
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.genruntimeconfig.cache
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\ref\WebApplication4.dll
+C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.sourcelink.json
