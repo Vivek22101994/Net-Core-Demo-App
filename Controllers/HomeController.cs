@@ -50,6 +50,12 @@ namespace WebApplication4.Controllers
         public IActionResult Login()
         {
             //throw new Exception("Database connection failed");
+            int i = 1;
+            for (; i <= 5; i++)
+            {
+                Console.WriteLine(i);
+            }
+           
             string strName = "VivekParikh";
             string LastChar = strName[^1].ToString();
             if (strName[0] == 'V' && strName[^1] == 'h')

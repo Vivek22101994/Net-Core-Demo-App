@@ -586,6 +586,7 @@ C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\We
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.RazorAssemblyInfo.cache
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.RazorAssemblyInfo.cs
+C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.sourcelink.json
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\rjimswa.dswa.cache.json
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -668,4 +669,3 @@ C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\re
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.pdb
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.genruntimeconfig.cache
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\ref\WebApplication4.dll
-C:\Users\Admin\source\repos\WebApplication4\WebApplication4\obj\Debug\net10.0\WebApplication4.sourcelink.json

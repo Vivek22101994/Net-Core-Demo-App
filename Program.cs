@@ -38,6 +38,11 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error/Detail");
     app.UseStatusCodePagesWithReExecute("/Error/Detail/{0}");
 }
+app.MapGet("/Notification", async (HttpContext ctx) =>
+{
+    var handler = new EndpointConecction(); // your class
+    return await handler.Handle();
+});
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
 

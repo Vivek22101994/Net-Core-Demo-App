@@ -28,7 +28,7 @@ public class ProductService : IProduct
             usrAdmin.Email = registrationModel.UserEmail;
             usrAdmin.Lang = registrationModel.Language;
             _context.USR_ADMIN.Add(usrAdmin);
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
             Result = true;
         }
         catch (Exception ex)
