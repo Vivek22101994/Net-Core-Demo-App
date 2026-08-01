@@ -1,20 +1,56 @@
 using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Configuration;
+using System.Text;
 using WebApplication4.Models;
+using WebApplication4.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add JWT Configuration
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"];
+
+if (!string.IsNullOrEmpty(secretKey))
+{
+    var key = Encoding.ASCII.GetBytes(secretKey);
+
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = !string.IsNullOrEmpty(jwtSettings["Issuer"]),
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidateAudience = !string.IsNullOrEmpty(jwtSettings["Audience"]),
+            ValidAudience = jwtSettings["Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaltConnection");
-builder.Services.AddScoped<IProduct,ProductService>();
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IProduct, ProductService>();
+builder.Services.AddScoped<IPasswordHasher<UsrAdmin>, PasswordHasher<UsrAdmin>>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<Common>();
-builder.Services.AddScoped<AutoLogService>();
+builder.Services.AddSingleton<AutoLogService>();
 
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -38,13 +74,15 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error/Detail");
     app.UseStatusCodePagesWithReExecute("/Error/Detail/{0}");
 }
-app.MapGet("/Notification", async (HttpContext ctx) =>
+app.MapGet("/Notification", async () =>
 {
-    var handler = new EndpointConecction(); // your class
-    return await handler.Handle();
+    var handler = new EndpointConecction(); // Calling the Handle method of the NotificationHandler class
+    return await handler.Handle(); // Calling And Retrun the Result
 });
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHangfireDashboard("/hangfire/dashboard",new DashboardOptions
 {

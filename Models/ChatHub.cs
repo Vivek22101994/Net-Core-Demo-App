@@ -7,8 +7,7 @@
             message = "Handled by NotificationHandler class",
             status = "success",
             timestamp = DateTime.UtcNow
-        };
-       
-        return Results.Json(response);
+        }; 
+        return Results.Ok(response);
     }
 }

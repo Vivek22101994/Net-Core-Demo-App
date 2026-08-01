@@ -125,12 +125,12 @@ namespace WebApplication4.Controllers
             return View();
         }
         [HttpPost]
-        public IActionResult Registation(RegistrationModel registrationModel)
+        public async Task<IActionResult> Registation(RegistrationModel registrationModel)
         {
             if (!ModelState.IsValid)
                 return View(registrationModel);
 
-            bool isRegister = Service.AddUser(registrationModel);
+            bool isRegister =  await Service.AddUser(registrationModel);
             if (isRegister)
             {
                 return RedirectToAction("Login", "Home");

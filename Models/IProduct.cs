@@ -9,5 +9,5 @@ public interface IProduct
     public UsrAdmin Login(string UserName,string Pass);
     public bool CheckUser(string Email);
 
-    public bool AddUser(RegistrationModel usrAdmin);
+    public Task<bool> AddUser(RegistrationModel usrAdmin);
 }

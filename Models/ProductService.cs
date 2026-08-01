@@ -11,7 +11,7 @@ public class ProductService : IProduct
     {
         _context = AplicationDbContet;
     }
-    public bool AddUser(RegistrationModel registrationModel)
+    public async Task<bool> AddUser(RegistrationModel registrationModel)
     {
         bool Result = false;
         try
@@ -28,7 +28,7 @@ public class ProductService : IProduct
             usrAdmin.Email = registrationModel.UserEmail;
             usrAdmin.Lang = registrationModel.Language;
             _context.USR_ADMIN.Add(usrAdmin);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             Result = true;
         }
         catch (Exception ex)
