@@ -24,17 +24,16 @@ namespace WebApplication4.Controllers
     {
         private readonly IProduct Service;
         private readonly IHostingEnvironment _HostEnvironment;
-        private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IMapper _mapper;
        // private readonly IOptionsMonitor<EmailOptions> _options;
         private readonly Common _common;
        
 
-        public HomeController(IProduct productService, IHostingEnvironment HostEnvironment,IPasswordHasher<User> passwordHasher,IMapper mapper,Common common)
+        public HomeController(IProduct productService, IHostingEnvironment HostEnvironment,IMapper mapper,Common common)
         {
             Service = productService;
             _HostEnvironment = HostEnvironment;
-            _passwordHasher = passwordHasher;
+           
             _mapper = mapper;
             //_options = options;
             _common = common;
@@ -217,46 +216,35 @@ namespace WebApplication4.Controllers
             return View();
         }
         // Upload File With Ajax FormData And Create hash Passord For User Tbl
-        public IActionResult SaveHomewAyData()
-        {
-            string UserName = Request.Form["UserName"];
-            string Passowrd = Request.Form["Password"];
-            User usrAdmin = new User
-            {
-                Username = UserName
-            };
-            var PasswordHash = _passwordHasher.HashPassword(usrAdmin, Passowrd);
-            usrAdmin.Password = PasswordHash;
+        public async Task<IActionResult> SaveHomewAyData()
+        {           
             foreach (var file in Request.Form.Files)
             {
                 var UploadFolder = Path.Combine(_HostEnvironment.WebRootPath, "Images");
 
                 if (!System.IO.Directory.Exists(UploadFolder))
                     System.IO.Directory.CreateDirectory(UploadFolder);
-
-                string FileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+                string FileName = Guid.CreateVersion7(DateTime.Now).ToString() + "_" + file.FileName;
                 string filePath = Path.Combine(UploadFolder, FileName);
-                file.CopyTo(new FileStream(filePath, FileMode.Create));
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await file.CopyToAsync(stream);
             }
             return Json(true);
         }
         // Upload File With Razor FormData
         [HttpPost]
-        public IActionResult Index(NewPrdocut newPrdocut)
+        public async Task<IActionResult> Index(NewPrdocut newPrdocut)
         {
             if(newPrdocut.Photo != null)
-            {
-                
+            {                
                 var UploadFolder = Path.Combine(_HostEnvironment.WebRootPath, "Images");
-
                 if (!System.IO.Directory.Exists(UploadFolder))
                     System.IO.Directory.CreateDirectory(UploadFolder);
-
-                string FileName = Guid.NewGuid().ToString() + "_" + newPrdocut.Photo.FileName;
+                string FileName = Guid.CreateVersion7(DateTime.Now).ToString() + "_" + newPrdocut.Photo.FileName;
                 string filePath = Path.Combine(UploadFolder, FileName);
-                newPrdocut.Photo.CopyTo(new FileStream(filePath, FileMode.Create));
-            }
-            
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await newPrdocut.Photo.CopyToAsync(stream);
+            }            
             return View("Index");
         }
         [AcceptVerbs("GET", "POST")]

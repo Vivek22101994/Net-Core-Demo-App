@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using WebApplication4.Models;
 using WebApplication4.Services;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 
 namespace WebApplication4.Controllers
 {
@@ -19,6 +21,7 @@ namespace WebApplication4.Controllers
         private readonly IPasswordHasher<UsrAdmin> _passwordHasher;
         private readonly MyDbContext _dbContext;
         private readonly ILogger<AuthController> _logger;
+        private readonly KafkaProducerService _producer;
 
         /// <summary>
         /// Initialize the AuthController with required dependencies
@@ -27,12 +30,14 @@ namespace WebApplication4.Controllers
             IJwtTokenService jwtTokenService,
             IPasswordHasher<UsrAdmin> passwordHasher,
             MyDbContext dbContext,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            KafkaProducerService producer)
         {
             _jwtTokenService = jwtTokenService ?? throw new ArgumentNullException(nameof(jwtTokenService));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _producer = producer;
         }
 
         /// <summary>
@@ -59,43 +64,47 @@ namespace WebApplication4.Controllers
             {
                 // Find user in database by UserName or Login
                 UsrAdmin? user = null;
-
                 user = await _dbContext.USR_ADMIN
                     .FirstOrDefaultAsync(u => u.UserName == request.Username);
-
                 if (user == null)
                 {
                     user = await _dbContext.USR_ADMIN
                         .FirstOrDefaultAsync(u => u.Login == request.Username);
                 }
-
                 if (user == null)
                 {
                     user = await _dbContext.USR_ADMIN
                         .FirstOrDefaultAsync(u => u.Email == request.Username);
                 }
-
                 if (user == null)
                 {
                     _logger.LogWarning($"Login attempt for non-existent user: {request.Username}");
                     return Unauthorized(new { message = "Invalid username or password" });
                 }
-
-                // Verify password - direct comparison
-                // TODO: In production, implement proper password hashing with BCrypt or similar
-                var isPasswordValid = user.Password == request.Password;
-
+                // Verify password using IPasswordHasher
+                bool isPasswordValid = false;
+                var result = _passwordHasher.VerifyHashedPassword(user, user.Password, request.Password);
+                if (result == PasswordVerificationResult.Success)
+                {
+                    isPasswordValid = true;
+                }              
                 if (!isPasswordValid)
                 {
                     _logger.LogWarning($"Failed login attempt for user: {request.Username}");
                     return Unauthorized(new { message = "Invalid username or password" });
                 }
-
                 // Generate JWT token
                 var tokenResponse = _jwtTokenService.GenerateToken(user);
 
-                _logger.LogInformation($"User successfully authenticated: {user.UserName}");
+                //var evt = new
+                //{
+                //    UserID = user.UserId,
+                //    AuthToken = tokenResponse.Token
+                //};
+                ////var json = JsonSerializer.Serialize(evt);
+                ////await _producer.PublishAsync("token-created", user.UserId.ToString(), json);
 
+                _logger.LogInformation($"User successfully authenticated: {user.UserName}");
                 return Ok(tokenResponse);
             }
             catch (Exception ex)
@@ -104,7 +113,6 @@ namespace WebApplication4.Controllers
                 return StatusCode(500, new { message = "An error occurred during authentication", error = ex.Message });
             }
         }
-
         /// <summary>
         /// Validate an existing JWT token
         /// </summary>
@@ -114,25 +122,22 @@ namespace WebApplication4.Controllers
         /// <response code="401">Token is invalid or expired</response>
         [HttpPost("validate")]
         [AllowAnonymous]
-        public ActionResult<object> ValidateToken([FromBody] string token)
+        public ActionResult<object> ValidateToken()
         {
-            if (string.IsNullOrWhiteSpace(token))
+            string JWToken = Request.Headers.ContainsKey("Authorization") ? Request.Headers["Authorization"].ToString() : "";
+            if (string.IsNullOrWhiteSpace(JWToken))
             {
                 return BadRequest(new { message = "Token is required" });
             }
-
             try
             {
-                var principal = _jwtTokenService.ValidateToken(token);
-
+                var principal = _jwtTokenService.ValidateToken(JWToken);
                 if (principal == null)
                 {
                     _logger.LogWarning("Token validation failed");
                     return Unauthorized(new { message = "Invalid or expired token" });
                 }
-
                 var claims = principal.Claims.Select(c => new { c.Type, c.Value }).ToList();
-
                 return Ok(new { message = "Token is valid", claims });
             }
             catch (Exception ex)
@@ -141,7 +146,6 @@ namespace WebApplication4.Controllers
                 return StatusCode(500, new { message = "An error occurred during token validation", error = ex.Message });
             }
         }
-
         /// <summary>
         /// Get current user information (requires authentication)
         /// </summary>
@@ -190,19 +194,15 @@ namespace WebApplication4.Controllers
             try
             {
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
                 if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int id))
                 {
                     return Unauthorized(new { message = "Invalid user information in token" });
                 }
-
                 var user = await _dbContext.USR_ADMIN.FindAsync(id);
-
                 if (user == null)
                 {
                     return Unauthorized(new { message = "User not found" });
                 }
-
                 var tokenResponse = _jwtTokenService.GenerateToken(user);
 
                 _logger.LogInformation($"Token refreshed for user: {user.UserName}");

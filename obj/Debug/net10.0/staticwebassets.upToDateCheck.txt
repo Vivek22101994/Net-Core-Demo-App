@@ -1,5 +1,6 @@
 wwwroot\css\site.css
 wwwroot\favicon.png
+wwwroot\Images\e4a046f8-2a4b-4838-bd2f-73145d67b1bb_Vivek_Parikh_BCA_Academic Transcript_Subjects.pdf
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map

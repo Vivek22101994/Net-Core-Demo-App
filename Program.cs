@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.Configuration;
 using System.Text;
+using System.Text.Json;
 using WebApplication4.Models;
 using WebApplication4.Services;
 
@@ -38,6 +40,41 @@ if (!string.IsNullOrEmpty(secretKey))
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
+        options.Events = new JwtBearerEvents
+        {
+            // Fires when there's no token, or token is invalid/expired
+            OnAuthenticationFailed = context =>
+            {
+                if (context.Exception is SecurityTokenExpiredException) // Check Logic Of Wether Token Expired Or Not And Set Result HttpContext
+                {
+                    // Flag it so OnChallenge can read this later
+                    context.HttpContext.Items["auth-error"] = "token_expired";
+                }
+                else
+                {
+                    context.HttpContext.Items["auth-error"] = "token_invalid";
+                }
+                return Task.CompletedTask;
+            },
+            OnChallenge = async context =>
+            {
+                string errorCode = context.HttpContext.Items["auth-error"] as string ?? "token_missing";
+                context.HandleResponse(); // stop default behavior
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                context.Response.ContentType = "application/json";
+                string messageErrpr = errorCode switch
+                {
+                    "token_expired" => "Unauthorized Access token has expired. Use refresh token to obtain a new one.",
+                    "token_invalid" => "Unauthorized Access token is invalid.",
+                    _ => "Authentication token is missing."
+                };
+                var result = new 
+                { 
+                    message = messageErrpr
+                };
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(result));
+            }           
+        };
     });
 }
 
@@ -51,6 +88,8 @@ builder.Services.AddScoped<IPasswordHasher<UsrAdmin>, PasswordHasher<UsrAdmin>>(
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<Common>();
 builder.Services.AddSingleton<AutoLogService>();
+builder.Services.AddSingleton<KafkaProducerService>();
+builder.Services.AddHostedService<KafkaConsumerService>();
 
 builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
@@ -101,6 +140,8 @@ RecurringJob.AddOrUpdate<AutoLogService>(
 
 BackgroundJob.Enqueue<AutoLogService>(x => x.AddLog());
 app.UseRouting();
+app.UseAuthentication();   
+app.UseAuthorization();
 app.UseOutputCache();
 app.MapControllers();
 app.MapControllerRoute(

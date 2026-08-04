@@ -71,15 +71,13 @@ namespace WebApplication4.Services
                     new Claim("UniqueId", user.UniqueId.ToString()),
                     new Claim("RoleId", user.RoleId.ToString())
                 };
-
                 var token = new JwtSecurityToken(
                     issuer: issuer,
                     audience: audience,
                     claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+                    expires: DateTime.Now.AddMinutes(expiryMinutes),
                     signingCredentials: credentials
                 );
-
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var tokenString = tokenHandler.WriteToken(token);
 
