@@ -25,6 +25,16 @@
   },
   {
     "ContainingType": "WebApplication4.Controllers.AuthController",
+    "Method": "Logout",
+    "RelativePath": "api/Auth/logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "WebApplication4.Controllers.AuthController",
     "Method": "GetCurrentUser",
     "RelativePath": "api/Auth/me",
     "HttpMethod": "GET",
@@ -73,7 +83,7 @@
   },
   {
     "ContainingType": "Program\u002B\u003C\u003Ec",
-    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_2",
+    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_3",
     "RelativePath": "Notification",
     "HttpMethod": "GET",
     "IsController": false,
@@ -89,7 +99,7 @@
   },
   {
     "ContainingType": "Program\u002B\u003C\u003Ec",
-    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_3",
+    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_4",
     "RelativePath": "products",
     "HttpMethod": "POST",
     "IsController": false,

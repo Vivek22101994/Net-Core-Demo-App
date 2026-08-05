@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 using System.Text.Json;
 using WebApplication4.Models;
 using WebApplication4.Services;
@@ -105,6 +106,14 @@ namespace WebApplication4.Controllers
                 ////await _producer.PublishAsync("token-created", user.UserId.ToString(), json);
 
                 _logger.LogInformation($"User successfully authenticated: {user.UserName}");
+                Response.Cookies.Append("access_token", tokenResponse.Token,
+                                       new CookieOptions
+                                       {
+                                           HttpOnly = true,
+                                           Secure = true,
+                                           SameSite = SameSiteMode.None,
+                                           Expires = DateTime.Now.AddHours(1)
+                                       });
                 return Ok(tokenResponse);
             }
             catch (Exception ex)
@@ -215,5 +224,18 @@ namespace WebApplication4.Controllers
                 return StatusCode(500, new { message = "An error occurred refreshing the token", error = ex.Message });
             }
         }
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("access_token", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+
+            return Ok();
+        }
     }
+
 }

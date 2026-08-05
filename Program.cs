@@ -43,6 +43,7 @@ if (!string.IsNullOrEmpty(secretKey))
         options.Events = new JwtBearerEvents
         {
             // Fires when there's no token, or token is invalid/expired
+
             OnAuthenticationFailed = context =>
             {
                 if (context.Exception is SecurityTokenExpiredException) // Check Logic Of Wether Token Expired Or Not And Set Result HttpContext
@@ -54,6 +55,13 @@ if (!string.IsNullOrEmpty(secretKey))
                 {
                     context.HttpContext.Items["auth-error"] = "token_invalid";
                 }
+                return Task.CompletedTask;
+            },
+            OnMessageReceived = context =>
+            {
+                context.Token =
+                    context.Request.Cookies["access_token"];
+
                 return Task.CompletedTask;
             },
             OnChallenge = async context =>
@@ -105,6 +113,16 @@ builder.Services.AddHangfire((sp, confir) =>
     confir.UseSqlServerStorage(connectionString);
 });
 builder.Services.AddHangfireServer();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3004")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -120,6 +138,7 @@ app.MapGet("/Notification", async () =>
 });
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors("ReactPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
