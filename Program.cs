@@ -1,17 +1,49 @@
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Configuration;
 using System.Text;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 using WebApplication4.Models;
 using WebApplication4.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add RateLimit Configuration For Prevent Abuse Traffic
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("fixed", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromSeconds(30);
+    });
+    options.AddPolicy("PerIpPolicy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromSeconds(30)
+    }));
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json"; 
+        var error = new
+        {           
+            error = "TooManyRequests",
+            message = "You have exceeded the allowed request limit. Please try again later.",           
+        };
+        await context.HttpContext.Response.WriteAsync(
+            JsonConvert.SerializeObject(error), cancellationToken);
+    };
+});
 // Add JWT Configuration
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
@@ -117,7 +149,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:3004")
+        policy.WithOrigins("http://localhost:3000")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -159,6 +191,7 @@ RecurringJob.AddOrUpdate<AutoLogService>(
 
 BackgroundJob.Enqueue<AutoLogService>(x => x.AddLog());
 app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();   
 app.UseAuthorization();
 app.UseOutputCache();

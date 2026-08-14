@@ -8,4 +8,10 @@ public class MyDbContext : DbContext
     public DbSet<Product> Products { get; set; }
 
     public DbSet<UsrAdmin> USR_ADMIN { get; set; }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Product>()
+            .HasQueryFilter(p => p.Name == "Test");
+    }
+
 }

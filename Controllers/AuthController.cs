@@ -40,7 +40,6 @@ namespace WebApplication4.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _producer = producer;
         }
-
         /// <summary>
         /// Authenticate user and generate JWT token
         /// </summary>
@@ -60,7 +59,6 @@ namespace WebApplication4.Controllers
                 _logger.LogWarning("Login attempt with missing credentials");
                 return BadRequest(new { message = "Username and password are required" });
             }
-
             try
             {
                 // Find user in database by UserName or Login
@@ -97,16 +95,18 @@ namespace WebApplication4.Controllers
                 // Generate JWT token
                 var tokenResponse = _jwtTokenService.GenerateToken(user);
 
-                //var evt = new
-                //{
-                //    UserID = user.UserId,
-                //    AuthToken = tokenResponse.Token
-                //};
-                ////var json = JsonSerializer.Serialize(evt);
-                ////await _producer.PublishAsync("token-created", user.UserId.ToString(), json);
+                var evt = new
+                {
+                    UserID = user.UserId,
+                    AuthToken = tokenResponse.Token
+                };
+                var json = JsonSerializer.Serialize(evt);
+                await _producer.PublishAsync("token-created", user.UserId.ToString(), json);
+                
+
 
                 _logger.LogInformation($"User successfully authenticated: {user.UserName}");
-                Response.Cookies.Append("access_token", tokenResponse.Token,
+                 Response.Cookies.Append("access_token", tokenResponse.Token,
                                        new CookieOptions
                                        {
                                            HttpOnly = true,
@@ -114,7 +114,7 @@ namespace WebApplication4.Controllers
                                            SameSite = SameSiteMode.None,
                                            Expires = DateTime.Now.AddHours(1)
                                        });
-                return Ok(tokenResponse);
+                 return Ok(tokenResponse);
             }
             catch (Exception ex)
             {
@@ -164,6 +164,7 @@ namespace WebApplication4.Controllers
         [HttpGet("me")]
         [Authorize]
         public ActionResult<object> GetCurrentUser()
+        
         {
             try
             {
@@ -233,9 +234,7 @@ namespace WebApplication4.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.None
             });
-
             return Ok();
         }
     }
-
 }

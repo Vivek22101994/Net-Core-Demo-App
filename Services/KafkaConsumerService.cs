@@ -21,7 +21,7 @@ public class KafkaConsumerService : BackgroundService
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _consumer.Subscribe("orders-topic");
+        _consumer.Subscribe("token-created");
 
         // Run the blocking Consume loop on a background thread so it
         // doesn't tie up a thread-pool thread with sync blocking calls
@@ -34,6 +34,11 @@ public class KafkaConsumerService : BackgroundService
                     var result = _consumer.Consume(stoppingToken);
                     ProcessMessage(result.Message.Value);
                     _consumer.Commit(result); // commit only after successful processing
+                }
+                // Handle specific Kafka exceptions that indicate the consumer is not ready yet
+                catch (KafkaException ex) when (ex.Error.Code == ErrorCode.Local_NoOffset || ex.Message.Contains("Waiting for coordinator"))
+                {
+                    _logger.LogWarning("Commit skipped, coordinator not ready yet: {Message}", ex.Message);
                 }
                 catch (ConsumeException ex)
                 {

@@ -114,7 +114,7 @@ namespace WebApplication4.Controllers
                 6
 
             };
-
+            var Duplicate = strarray.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToArray();
             var gropy = strarray.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
             int[] numver = Enumerable.Range(0, 7).ToArray();
             return View();
