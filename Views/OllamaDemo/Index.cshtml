@@ -7,16 +7,24 @@
 
         <div class="chat-container">
             <div class="chat-header">
-                <span>🤖 Ollama Chat</span>
+                <span>🤖 Ollama Vision Chat</span>
             </div>
 
             <div class="chat-body" id="chatBody">
-                <div class="chat-placeholder" id="placeholder">Start a conversation below 👇</div>
+                <div class="chat-placeholder" id="placeholder">Start a conversation or upload an image 👇</div>
             </div>
 
             <form id="chatForm" class="chat-input-form" autocomplete="off">
+                <div id="imagePreviewWrap" class="image-preview-wrap" style="display:none;">
+                    <img id="imagePreview" class="image-preview" />
+                    <button type="button" id="removeImageBtn" class="remove-img-btn">✕</button>
+                </div>
+
                 <div class="input-row">
-                    <input id="messageInput" class="form-control chat-input" placeholder="Type a message..." />
+                    <label for="imageInput" class="attach-btn" title="Attach image">📎</label>
+                    <input type="file" id="imageInput" accept="image/*" hidden />
+
+                    <input id="messageInput" class="form-control chat-input" placeholder="Type a message or ask about the image..." />
                     <button type="submit" class="btn btn-primary send-btn" id="sendBtn">
                         <span>Send</span>
                     </button>
@@ -91,6 +99,13 @@
         border-bottom-left-radius: 2px;
     }
 
+    .bubble-img {
+        max-width: 220px;
+        border-radius: 10px;
+        margin-top: 6px;
+        display: block;
+    }
+
     .typing-cursor::after {
         content: "▍";
         animation: blink 1s step-start infinite;
@@ -110,8 +125,21 @@
 
     .input-row {
         display: flex;
+        align-items: center;
         gap: 10px;
     }
+
+    .attach-btn {
+        font-size: 20px;
+        cursor: pointer;
+        padding: 6px 8px;
+        border-radius: 50%;
+        transition: background 0.15s;
+    }
+
+        .attach-btn:hover {
+            background: #eee;
+        }
 
     .chat-input {
         flex: 1;
@@ -128,6 +156,33 @@
         .send-btn:disabled {
             opacity: 0.6;
         }
+
+    .image-preview-wrap {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+
+    .image-preview {
+        max-height: 90px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .remove-img-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        font-size: 12px;
+        cursor: pointer;
+        line-height: 1;
+    }
 </style>
 
 <script>
@@ -136,8 +191,33 @@
     const chatBody = document.getElementById('chatBody');
     const sendBtn = document.getElementById('sendBtn');
     const placeholder = document.getElementById('placeholder');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewWrap = document.getElementById('imagePreviewWrap');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImageBtn = document.getElementById('removeImageBtn');
 
-    function addBubble(text, isUser) {
+    let selectedFile = null;
+
+    imageInput.addEventListener('change', () => {
+        const file = imageInput.files[0];
+        if (!file) return;
+        selectedFile = file;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreviewWrap.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    removeImageBtn.addEventListener('click', () => {
+        selectedFile = null;
+        imageInput.value = '';
+        imagePreviewWrap.style.display = 'none';
+    });
+
+    function addBubble(text, isUser, imageUrl) {
         if (placeholder) placeholder.remove();
 
         const bubble = document.createElement('div');
@@ -146,13 +226,20 @@
         const label = document.createElement('div');
         label.className = 'bubble-label';
         label.textContent = isUser ? 'You' : 'Assistant';
+        bubble.appendChild(label);
+
+        if (imageUrl) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.className = 'bubble-img';
+            bubble.appendChild(img);
+        }
 
         const textDiv = document.createElement('div');
         textDiv.className = 'bubble-text';
         textDiv.textContent = text;
-
-        bubble.appendChild(label);
         bubble.appendChild(textDiv);
+
         chatBody.appendChild(bubble);
         chatBody.scrollTop = chatBody.scrollHeight;
 
@@ -162,10 +249,19 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const message = input.value.trim();
-        if (!message) return;
+        if (!message && !selectedFile) return;
 
-        addBubble(message, true);
+        const imgPreviewUrl = selectedFile ? imagePreview.src : null;
+        addBubble(message || '(image only)', true, imgPreviewUrl);
+
+        const formData = new FormData();
+        formData.append('message', message);
+        if (selectedFile) formData.append('image', selectedFile);
+
         input.value = '';
+        selectedFile = null;
+        imageInput.value = '';
+        imagePreviewWrap.style.display = 'none';
         sendBtn.disabled = true;
 
         const botTextDiv = addBubble('', false);
@@ -174,8 +270,7 @@
         try {
             const response = await fetch('@Url.Action("StreamChat", "OllamaDemo")', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'message=' + encodeURIComponent(message)
+                body: formData
             });
 
             const reader = response.body.getReader();

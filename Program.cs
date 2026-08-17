@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using OllamaSharp;
 using System.Configuration;
 using System.Text;
 using System.Text.Json;
@@ -13,6 +14,7 @@ using WebApplication4.Models;
 using WebApplication4.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddChatClient(new OllamaApiClient(new Uri("http://localhost:11434"), "llama3.2-vision:latest"));
 
 // Add RateLimit Configuration For Prevent Abuse Traffic
 builder.Services.AddRateLimiter(options =>

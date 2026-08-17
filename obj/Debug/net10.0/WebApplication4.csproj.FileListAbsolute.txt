@@ -352,6 +352,8 @@ C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Mi
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Design.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Relational.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.SqlServer.dll
+C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.Extensions.AI.dll
+C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.Extensions.AI.Abstractions.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.Extensions.DependencyModel.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.Identity.Client.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Microsoft.Identity.Client.Extensions.Msal.dll
@@ -382,6 +384,7 @@ C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Nu
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\NuGet.ProjectModel.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\NuGet.Protocol.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\NuGet.Versioning.dll
+C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\OllamaSharp.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.ClientModel.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.CodeDom.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.Composition.AttributedModel.dll
@@ -392,6 +395,7 @@ C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\Sy
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.Configuration.ConfigurationManager.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.Memory.Data.dll
+C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.Numerics.Tensors.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.Reflection.MetadataLoadContext.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\Admin\source\repos\WebApplication4\WebApplication4\bin\Debug\net10.0\ca\Hangfire.Core.resources.dll
